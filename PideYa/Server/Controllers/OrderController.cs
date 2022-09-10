@@ -36,33 +36,49 @@ namespace PideYa.Server.Controllers
         [HttpGet("/api/OrderAddDetail")]
         public async Task<ActionResult<Order?>> AddDetailOrder(int orderId, int dishId, int quantity = 1)
         {
-            var existingOrder = await _context.Orders
+            if (!await _context.Dishes.AnyAsync(d => d.id == dishId))
+            {
+                return NotFound();
+            }
+
+            var dish = await _context.Dishes.FirstOrDefaultAsync(d => d.id == dishId);
+            Order? order;
+            if (!await _context.Orders.AnyAsync(o => o.Id == orderId && o.Status == OrderStatus.Pending))
+            {
+                order = new Order
+                {
+                    CreatedAt = DateTime.Now,
+                    Status = OrderStatus.Pending,
+                    Total = 0,
+                    UserId = 1,
+                    OrderDetails = new List<OrderDetail>
+                    {
+                        new()
+                        {
+                            Dish = dish,
+                            Quantity = quantity,
+                            SubTotal = dish.Price * quantity
+                        }
+                    },
+                };
+                _context.Orders.Add(order);
+            }
+            else
+            {
+                order = await _context.Orders
                 .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(
-                o => o.Id == orderId &&
-                (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing)
-            );
-            if (existingOrder is null)
-            {
-                return NotFound("Order not found");
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+                order.OrderDetails.Add(new()
+                {
+                    Dish = dish,
+                    Quantity = quantity,
+                    SubTotal = dish.Price * quantity,
+                });
+                _context.Entry(order).State = EntityState.Modified;
             }
-
-            var existingDish = await _context.Dishes.FirstOrDefaultAsync(d => d.id == dishId);
-            if (existingDish is null)
-            {
-                return NotFound("Dish not found");
-            }
-
-            if (quantity <= 0) quantity = 1;
-            existingOrder.OrderDetails.Add(new()
-            {
-                Dish = existingDish,
-                Quantity = quantity,
-                SubTotal = existingDish.Price * quantity
-            });
 
             await _context.SaveChangesAsync();
-            return Ok(existingOrder);
+            return Ok(order);
         }
 
         // GET: api/Order

@@ -8,6 +8,7 @@ namespace PideYa.Shared.Entities
         public OrderStatus Status { get; set; }
         public float Total { get; set; }
 
+        public int UserId { get; set; }
         public User User { get; set; }
         public ICollection<OrderDetail> OrderDetails { get; set; }
     }
