@@ -1,48 +1,44 @@
 ﻿@page "/fetchdata"
-@using PideYa.Shared
+@using PideYa.Shared.Entities
 @inject HttpClient Http
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>PideYa - Pilas que tengo hambre</PageTitle>
 
-<h1>Weather forecast</h1>
+<h1>La comelona del dia!</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
+<p>Que hay pa hoy?</p>
 
-@if (forecasts == null)
+@if (dishes == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var dish in dishes)
+        {
+
+            <div class="col">
+                <div class="card">
+                    <img src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">@dish.Name</h5>
+                        <p class="card-text">@dish.Description</p>
+                        <a href="#" class="btn btn-primary">Mete eso ahi!</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private List<Dish>? dishes;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        dishes = await Http.GetFromJsonAsync<List<Dish>>("/api/Dish");
     }
 }
 
