@@ -28,7 +28,11 @@ namespace PideYa.Server.Controllers
             {
                 return NotFound();
             }
-            return await _context.Orders.FirstOrDefaultAsync(
+            return await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.Dish)
+                .OrderByDescending(o => o.Id)
+                .FirstOrDefaultAsync(
                 o => o.User.Id == id &&
                 (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing));
         }
