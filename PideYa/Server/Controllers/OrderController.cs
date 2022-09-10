@@ -21,6 +21,50 @@ namespace PideYa.Server.Controllers
             _context = context;
         }
 
+        [HttpGet("/api/OrderByEmployee/{id}")]
+        public async Task<ActionResult<Order?>> GetActiveOrderByEmployee(int id)
+        {
+            if (!await _context.Orders.AnyAsync(o => o.User.Id == id))
+            {
+                return NotFound();
+            }
+            return await _context.Orders.FirstOrDefaultAsync(
+                o => o.User.Id == id &&
+                (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing));
+        }
+
+        [HttpGet("/api/OrderAddDetail")]
+        public async Task<ActionResult<Order?>> AddDetailOrder(int orderId, int dishId, int quantity = 1)
+        {
+            var existingOrder = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(
+                o => o.Id == orderId &&
+                (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing)
+            );
+            if (existingOrder is null)
+            {
+                return NotFound("Order not found");
+            }
+
+            var existingDish = await _context.Dishes.FirstOrDefaultAsync(d => d.id == dishId);
+            if (existingDish is null)
+            {
+                return NotFound("Dish not found");
+            }
+
+            if (quantity <= 0) quantity = 1;
+            existingOrder.OrderDetails.Add(new()
+            {
+                Dish = existingDish,
+                Quantity = quantity,
+                SubTotal = existingDish.Price * quantity
+            });
+
+            await _context.SaveChangesAsync();
+            return Ok(existingOrder);
+        }
+
         // GET: api/Order
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()

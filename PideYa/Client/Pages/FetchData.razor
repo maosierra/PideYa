@@ -24,7 +24,7 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@dish.Name</h5>
                         <p class="card-text">@dish.Description</p>
-                        <a href="#" class="btn btn-primary">Mete eso ahi!</a>
+                        <a @onclick="async ()=> await AddToCar(dish.id)" href="#" class="btn btn-primary">Mete eso ahi!</a>
                     </div>
                 </div>
             </div>
@@ -34,11 +34,26 @@ else
 
 @code {
     private List<Dish>? dishes;
+    private Order? order;
 
     protected override async Task OnInitializedAsync()
     {
-        //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
         dishes = await Http.GetFromJsonAsync<List<Dish>>("/api/Dish");
+        await getActiveOrder();
+    }
+
+    private async Task getActiveOrder()
+    {
+        var response = await Http.GetAsync("/api/OrderByEmployee/1");
+        if (response.IsSuccessStatusCode)
+        {
+            order = await response.Content.ReadFromJsonAsync<Order>();
+        }
+    }
+
+    private async Task AddToCar(int id)
+    {
+
     }
 }
 
