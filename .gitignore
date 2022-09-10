@@ -403,4 +403,9 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
 /PideYa/Server/Resources/Images/*
+
+LocalDatabase.db
+LocalDatabase.db-shm
+LocalDatabase.db-wal
