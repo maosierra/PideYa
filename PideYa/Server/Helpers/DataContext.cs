@@ -28,6 +28,7 @@ namespace PideYa.Server.Helpers
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<DishCategory> DishesCategories { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<DishImage> DishImages { get; set; }
     }
 }
 

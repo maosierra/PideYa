@@ -11,7 +11,7 @@ using PideYa.Server.Helpers;
 namespace PideYa.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220910144517_DishImageTables")]
+    [Migration("20220910161047_DishImageTables")]
     partial class DishImageTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,6 +63,26 @@ namespace PideYa.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DishesCategories");
+                });
+
+            modelBuilder.Entity("PideYa.Shared.Entities.DishImage", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Dishid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("url")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("Dishid");
+
+                    b.ToTable("DishImages");
                 });
 
             modelBuilder.Entity("PideYa.Shared.Entities.Order", b =>
@@ -160,6 +180,17 @@ namespace PideYa.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("PideYa.Shared.Entities.DishImage", b =>
+                {
+                    b.HasOne("PideYa.Shared.Entities.Dish", "Dish")
+                        .WithMany()
+                        .HasForeignKey("Dishid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dish");
                 });
 
             modelBuilder.Entity("PideYa.Shared.Entities.Order", b =>

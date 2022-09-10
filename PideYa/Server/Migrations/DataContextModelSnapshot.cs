@@ -63,6 +63,26 @@ namespace PideYa.Server.Migrations
                     b.ToTable("DishesCategories");
                 });
 
+            modelBuilder.Entity("PideYa.Shared.Entities.DishImage", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Dishid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("url")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("Dishid");
+
+                    b.ToTable("DishImages");
+                });
+
             modelBuilder.Entity("PideYa.Shared.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -152,12 +172,23 @@ namespace PideYa.Server.Migrations
             modelBuilder.Entity("PideYa.Shared.Entities.Dish", b =>
                 {
                     b.HasOne("PideYa.Shared.Entities.DishCategory", "Category")
-                        .WithMany("Dishes")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("PideYa.Shared.Entities.DishImage", b =>
+                {
+                    b.HasOne("PideYa.Shared.Entities.Dish", "Dish")
+                        .WithMany()
+                        .HasForeignKey("Dishid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dish");
                 });
 
             modelBuilder.Entity("PideYa.Shared.Entities.Order", b =>
@@ -188,11 +219,6 @@ namespace PideYa.Server.Migrations
                     b.Navigation("Dish");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("PideYa.Shared.Entities.DishCategory", b =>
-                {
-                    b.Navigation("Dishes");
                 });
 
             modelBuilder.Entity("PideYa.Shared.Entities.Order", b =>
