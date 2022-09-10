@@ -36,7 +36,6 @@ else
 @code {
     private List<Dish>? dishes;
     private Order? order;
-    [Parameter] public EventCallback<Order> orderChanged { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
