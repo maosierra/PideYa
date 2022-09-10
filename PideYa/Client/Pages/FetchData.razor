@@ -1,6 +1,7 @@
 ﻿@page "/fetchdata"
 @using PideYa.Shared.Entities
 @inject HttpClient Http
+@inject PideYa.Client.Services.OrderNotifierService orderNotifier
 
 <PageTitle>PideYa - Pilas que tengo hambre</PageTitle>
 
@@ -24,7 +25,7 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@dish.Name</h5>
                         <p class="card-text">@dish.Description</p>
-                        <a @onclick="async ()=> await AddToCar(dish.id)" href="#" class="btn btn-primary">Mete eso ahi!</a>
+                        <a @onclick="async ()=> await AddToCar(dish.id)" class="btn btn-primary">Mete eso ahi!</a>
                     </div>
                 </div>
             </div>
@@ -35,6 +36,7 @@ else
 @code {
     private List<Dish>? dishes;
     private Order? order;
+    [Parameter] public EventCallback<Order> orderChanged { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,12 +50,19 @@ else
         if (response.IsSuccessStatusCode)
         {
             order = await response.Content.ReadFromJsonAsync<Order>();
+            await orderNotifier.AddOrder(order);
         }
     }
 
     private async Task AddToCar(int id)
     {
-        //var response = await Http.PostAsync($"/api/OrderAddDetail?orderId=1&dishId=1&quantity=1");
+        var orderId = order?.Id ?? 0;
+        var response = await Http.GetAsync($"/api/OrderAddDetail?orderId={orderId}&dishId={id}&quantity=1");
+        if (response.IsSuccessStatusCode)
+        {
+            order = await response.Content.ReadFromJsonAsync<Order>();
+            await orderNotifier.AddOrder(order);
+        }
     }
 }
 
