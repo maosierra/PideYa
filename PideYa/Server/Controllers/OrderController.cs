@@ -85,6 +85,28 @@ namespace PideYa.Server.Controllers
             return Ok(order);
         }
 
+        [HttpGet("/api/OrderDeleteDetail")]
+        public async Task<ActionResult<Order?>> DeleteDetailOrder(int orderId, int detailId)
+        {
+            if (!await _context.Orders.AnyAsync(o => o.Id == orderId && o.Status == OrderStatus.Pending))
+            {
+                return NotFound();
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.Dish)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order is not null && order.OrderDetails.Any(d => d.Id == detailId))
+            {
+                order.OrderDetails.Remove(order.OrderDetails.Single(d => d.Id == detailId));
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(order);
+        }
+
         // GET: api/Order
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()

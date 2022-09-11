@@ -1,4 +1,7 @@
 ﻿@page "/shoppingcart"
+@inject HttpClient Http
+@inject PideYa.Client.Services.OrderNotifierService orderNotifier
+@using PideYa.Shared.Entities
 
 <PageTitle>PideYa - Apurate...</PageTitle>
 
@@ -10,7 +13,7 @@
             <thead>
                 <tr>
                     <th>Producto</th>
-                    <th class="d-none d-md-table-cell">imagen</th>
+                    <th class="d-none d-md-table-cell"></th>
                     <th class="d-none d-md-table-cell">Precio unidad</th>
                     <th>Cant</th>
                     <th>Subtotal</th>
@@ -18,30 +21,40 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <h5>Nombre test</h5>
-                        <small>Descripcion test</small>
-                        <br />
-                    </td>
-                    <td class="d-none d-md-table-cell">
-                        <a>
-                            <img src="https://cdnx.jumpseller.com/bootstrap/image/14896546/resize/120/150?1614272621" alt="Plato" title="plato" />
-                        </a>
-                    </td>
-                    <td class="d-none d-md-table-cell">
-                        <span>$1000</span>
-                    </td>
-                    <td>
-                        <span>1</span>
-                    </td>
-                    <td>
-                        <span>$1000</span>
-                    </td>
-                    <td>
-                        <span class="oi oi-trash" aria-hidden="true"></span>
-                    </td>
-                </tr>
+                @if (order != null && order.OrderDetails != null && order.OrderDetails.Count() > 0)
+                {
+                    @foreach (var detail in order.OrderDetails)
+                    {
+                        <tr>
+                            <td>
+                                <h5>@detail.Dish.Name</h5>
+                                <small>@detail.Dish.Description</small>
+                                <br />
+                            </td>
+                            <td class="d-none d-md-table-cell" style="max-width: 100px">
+                                <img class="w-75" src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" alt="Plato" title="plato" />
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                <span>$@detail.Dish.Price</span>
+                            </td>
+                            <td>
+                                <span>@detail.Quantity</span>
+                            </td>
+                            <td>
+                                <span>$@(detail.Dish.Price * detail.Quantity)</span>
+                            </td>
+                            <td>
+                                <a style="cursor: pointer;"
+                                   @onclick="async () =>await onDeleteDetail(detail.Id)">
+
+                                    <span class="oi oi-trash" aria-hidden="true"></span>
+
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+
             </tbody>
         </table>
     </div>
@@ -53,14 +66,14 @@
                     <tbody>
                         <tr class="totals">
                             <td colspan="1" class="text-left">Envio</td>
-                            <td colspan="1" class="text-right">$0</td>
+                            <td colspan="1" class="text-right">GRATIS!!!</td>
                         </tr>
                         <tr class="totals key">
                             <td colspan="1" class="text-left">
                                 <strong>Total</strong>
                             </td>
                             <td colspan="1" class="text-right">
-                                <strong>$100.00</strong>
+                                <strong>$@(order != null ? order.Total : 0)</strong>
                             </td>
                         </tr>
                     </tbody>
@@ -74,11 +87,40 @@
 </div>
 
 @code {
-    private int currentCount = 0;
+    private Order? order;
 
-    private void IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        var response = await Http.GetAsync("/api/OrderByEmployee/1");
+        if (response.IsSuccessStatusCode)
+        {
+            order = await response.Content.ReadFromJsonAsync<Order>();
+            SumUpDetails();
+            await orderNotifier.AddOrder(order);
+        }
+    }
+
+    private void SumUpDetails()
+    {
+        if (order is null) return;
+        if (order.OrderDetails.Count() <= 0) order.Total = 0;
+        foreach (var detail in order.OrderDetails)
+        {
+            order.Total += detail.Quantity * detail.Dish.Price;
+        }
+    }
+
+    private async Task onDeleteDetail(int detailId)
+    {
+        var orderId = order?.Id ?? 0;
+        var response = await Http.GetAsync($"/api/OrderDeleteDetail?orderId={orderId}&detailId={detailId}");
+        if (response.IsSuccessStatusCode)
+        {
+            order = await response.Content.ReadFromJsonAsync<Order>();
+            SumUpDetails();
+            await orderNotifier.AddOrder(order);
+            StateHasChanged();
+        }
     }
 }
 
