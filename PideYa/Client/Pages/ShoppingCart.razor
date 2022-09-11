@@ -1,12 +1,77 @@
-﻿@page "/shoppingcar"
+﻿@page "/shoppingcart"
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>PideYa - Apurate...</PageTitle>
 
-<h1>Counter</h1>
+<h1>Apurate que se acaba!!!</h1>
+<p>Confirma la comelona!</p>
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th class="d-none d-md-table-cell">imagen</th>
+                    <th class="d-none d-md-table-cell">Precio unidad</th>
+                    <th>Cant</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <h5>Nombre test</h5>
+                        <small>Descripcion test</small>
+                        <br />
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <a>
+                            <img src="https://cdnx.jumpseller.com/bootstrap/image/14896546/resize/120/150?1614272621" alt="Plato" title="plato" />
+                        </a>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <span>$1000</span>
+                    </td>
+                    <td>
+                        <span>1</span>
+                    </td>
+                    <td>
+                        <span>$1000</span>
+                    </td>
+                    <td>
+                        <span class="oi oi-trash" aria-hidden="true"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div class="col-lg-4 mb-4 mt-5">
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr class="totals">
+                            <td colspan="1" class="text-left">Envio</td>
+                            <td colspan="1" class="text-right">$0</td>
+                        </tr>
+                        <tr class="totals key">
+                            <td colspan="1" class="text-left">
+                                <strong>Total</strong>
+                            </td>
+                            <td colspan="1" class="text-right">
+                                <strong>$100.00</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-center col-12">
+                    <a class="btn btn-primary btn-block col-12" title="Comprar">Asegura tu comida</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private int currentCount = 0;
