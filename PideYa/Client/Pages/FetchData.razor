@@ -46,7 +46,7 @@ else
     private async Task getActiveOrder()
     {
         var response = await Http.GetAsync("/api/OrderByEmployee/1");
-        if (response.IsSuccessStatusCode)
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
         {
             order = await response.Content.ReadFromJsonAsync<Order>();
             await orderNotifier.AddOrder(order);

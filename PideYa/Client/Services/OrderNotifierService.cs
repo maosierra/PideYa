@@ -9,7 +9,6 @@ public class OrderNotifierService
 
     public async Task AddOrder(Order? order)
     {
-        if (order is null) return;
         this.Order = order;
         if (Notify is not null)
             await Notify?.Invoke();

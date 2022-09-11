@@ -79,7 +79,7 @@
                     </tbody>
                 </table>
                 <div class="text-center col-12">
-                    <a class="btn btn-primary btn-block col-12" title="Comprar">Asegura tu comida</a>
+                    <a @onclick="async () => await onBuy(order?.Id)" class="btn btn-primary btn-block col-12" title="Comprar">Asegura tu comida</a>
                 </div>
             </div>
         </div>
@@ -92,7 +92,7 @@
     protected override async Task OnInitializedAsync()
     {
         var response = await Http.GetAsync("/api/OrderByEmployee/1");
-        if (response.IsSuccessStatusCode)
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
         {
             order = await response.Content.ReadFromJsonAsync<Order>();
             SumUpDetails();
@@ -121,6 +121,21 @@
             await orderNotifier.AddOrder(order);
             StateHasChanged();
         }
+    }
+
+    private async Task onBuy(int? orderId)
+    {
+        if (orderId is not null && order is not null)
+        {
+            var response = await Http.GetAsync($"/api/OrderProcesing?orderId={orderId}");
+            if (response.IsSuccessStatusCode)
+            {
+                order = null;
+                await orderNotifier.AddOrder(order);
+                StateHasChanged();
+            }
+        }
+
     }
 }
 

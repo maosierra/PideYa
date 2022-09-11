@@ -34,7 +34,7 @@ namespace PideYa.Server.Controllers
                 .OrderByDescending(o => o.Id)
                 .FirstOrDefaultAsync(
                 o => o.User.Id == id &&
-                (o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing));
+                o.Status == OrderStatus.Pending);
         }
 
         [HttpGet("/api/OrderAddDetail")]
@@ -101,6 +101,28 @@ namespace PideYa.Server.Controllers
             if (order is not null && order.OrderDetails.Any(d => d.Id == detailId))
             {
                 order.OrderDetails.Remove(order.OrderDetails.Single(d => d.Id == detailId));
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(order);
+        }
+
+        [HttpGet("/api/OrderProcesing")]
+        public async Task<ActionResult<Order?>> OrderProcesing(int orderId)
+        {
+            if (!await _context.Orders.AnyAsync(o => o.Id == orderId && o.Status == OrderStatus.Pending))
+            {
+                return NotFound();
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.Dish)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order is not null)
+            {
+                order.Status = OrderStatus.Processing;
                 await _context.SaveChangesAsync();
             }
 
