@@ -1,0 +1,191 @@
+﻿@page "/createproduct"
+@using PideYa.Shared.Entities
+@using PideYa.Client.Shared
+@inject HttpClient Http
+
+<PageTitle>PideYa - Crea tu producto aca</PageTitle>
+
+<h1>Creacion de productos</h1>
+
+<Modal @ref="refModal">
+    <Title>Producto</Title>
+    <Body>
+        <p>
+            @BodyMessage
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => refModal.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <EditForm Model="@dish" OnValidSubmit="@(async ()=> await createProduct())">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Nombre Producto</label>
+                    <input @bind="@dish.Name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Nombre del producto">
+                </div>
+                <div class="mb-3">
+                    <label for="formFile" class="form-label">Imagen del producto</label>
+                    <InputFile OnChange="OnInputFileChage" class="form-control" type="file" id="formFile"></InputFile>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Precio</label>
+                    <input @bind="@dish.Price" type="number" min="0" step=".01" class="form-control" id="exampleFormControlInput1" placeholder="Nombre del producto">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Descripcion del producto</label>
+                    <textarea @bind="@dish.Description" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+
+                <select id="categoryId" class="form-select" aria-label="Default select example" @onchange="OnSelectCategory">
+                    <option selected hidden>Select a category</option>
+                    @if (categories is not null && categories.Count() > 0)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    }
+                </select>
+
+                <div class="mt-5">
+                    <button type="submit" class="btn btn-primary btn-block">Crear</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+    <div class="col-lg-8 mb-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th class="d-none d-md-table-cell"></th>
+                    <th class="d-none d-md-table-cell">Precio unidad</th>
+                    <th>Descripcion</th>
+                    <th>Categoria</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (products != null && products.Count() > 0)
+                {
+                    @foreach (var detail in products)
+                    {
+                        <tr>
+                            <td>
+                                <h5>@detail.Name</h5>
+                                <br />
+                            </td>
+                            <td class="d-none d-md-table-cell" style="max-width: 100px">
+                                <img class="w-75" src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" alt="Plato" title="plato" />
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                <span>$@detail.Price</span>
+                            </td>
+                            <td>
+                                <span>@detail.Description</span>
+                            </td>
+                            <td>
+                                <span>@detail.Category?.Name</span>
+                            </td>
+                            <td>
+                                <a style="cursor: pointer;"
+                                   @onclick="async () =>await onDeleteDetail(detail.id)">
+
+                                    <span class="oi oi-trash" aria-hidden="true"></span>
+
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@code{
+    private List<Dish>? products { get; set; }
+    private List<DishCategory>? categories { get; set; }
+    private IBrowserFile? file { get; set; }
+    private Dish dish = new();
+    private Modal refModal { get; set; }
+    private string BodyMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchProductList();
+        await FetchCategories();
+    }
+
+    private async Task FetchCategories()
+    {
+        var response = await Http.GetAsync("/api/DishCategory");
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            categories = await response.Content.ReadFromJsonAsync<List<DishCategory>>();
+        }
+    }
+
+    private async Task FetchProductList()
+    {
+        var response = await Http.GetAsync("/api/Dish");
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Dish>>();
+        }
+    }
+
+    private async Task createProduct()
+    {
+        var response = await Http.PostAsJsonAsync("/api/Dish", dish);
+        if (response.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+            BodyMessage = "Producto creado";
+            refModal.Open();
+            await FetchProductList();
+        }
+        else
+        {
+            BodyMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async Task onDeleteDetail(int id)
+    {
+        var response = await Http.DeleteAsync($"/api/Dish/{id}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            BodyMessage = "Producto eliminado";
+            refModal.Open();
+            await FetchProductList();
+        }
+        else
+        {
+            BodyMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private void OnInputFileChage(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+        if (files.Count() > 0)
+        {
+            file = files[0];
+        }
+    }
+
+    private void OnSelectCategory(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int catId))
+            dish.CategoryId = catId;
+    }
+}
+

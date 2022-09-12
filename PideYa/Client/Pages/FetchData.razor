@@ -25,6 +25,7 @@ else
                     <div class="card-body">
                         <h5 class="card-title">@dish.Name</h5>
                         <p class="card-text">@dish.Description</p>
+                        <p>$@dish.Price</p>
                         <a @onclick="async ()=> await AddToCar(dish.id)" class="btn btn-primary">Mete eso ahi!</a>
                     </div>
                 </div>
