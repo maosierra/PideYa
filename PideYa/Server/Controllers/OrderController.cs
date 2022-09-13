@@ -31,6 +31,7 @@ namespace PideYa.Server.Controllers
             return await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(d => d.Dish)
+                .ThenInclude(i => i.Image)
                 .OrderByDescending(o => o.Id)
                 .FirstOrDefaultAsync(
                 o => o.User.Id == id &&

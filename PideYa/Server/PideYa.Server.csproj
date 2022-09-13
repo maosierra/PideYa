@@ -37,9 +37,11 @@
     <None Remove="Microsoft.EntityFrameworkCore.Tools" />
     <None Remove="Swashbuckle.AspNetCore" />
     <None Remove="Resources\" />
+    <None Remove="Resources\Images\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />
     <Folder Include="Resources\" />
+    <Folder Include="Resources\Images\" />
   </ItemGroup>
 </Project>

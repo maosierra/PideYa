@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 
 namespace PideYa.Server.Controllers
 {
-    [Route ("api/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UploadController : Controller
     {
@@ -20,6 +20,10 @@ namespace PideYa.Server.Controllers
         {
             try
             {
+                var dish = context.Dishes.FirstOrDefault(o => o.id == id);
+
+                if (dish is null) return NotFound();
+
                 var file = Request.Form.Files[0];
                 var folderName = Path.Combine("Resources", "Images");
                 var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
@@ -34,10 +38,6 @@ namespace PideYa.Server.Controllers
                     {
                         file.CopyTo(stream);
                     }
-
-                    var dish = context.Dishes.FirstOrDefault(o => o.id == id);
-                    
-                    if (dish is null) return NotFound();
 
                     context.DishImages.Add(new Shared.Entities.DishImage()
                     {

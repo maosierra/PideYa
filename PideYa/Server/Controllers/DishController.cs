@@ -29,7 +29,10 @@ namespace PideYa.Server.Controllers
             {
                 return NotFound();
             }
-            return await _context.Dishes.Include(d => d.Category).ToListAsync();
+            return await _context.Dishes
+                .Include(d => d.Category)
+                .Include(d => d.Image)
+                .ToListAsync();
         }
 
         // GET: api/Dish/5

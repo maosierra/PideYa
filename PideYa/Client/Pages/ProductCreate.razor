@@ -83,7 +83,14 @@
                                 <br />
                             </td>
                             <td class="d-none d-md-table-cell" style="max-width: 100px">
-                                <img class="w-75" src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" alt="Plato" title="plato" />
+                                @if (detail.Image is not null && detail.Image.Count() > 0)
+                                {
+                                    <img src=@($"/{detail.Image.First().url}") class="card-img-top" alt=@(detail.Description??"Dish image")>
+                                }
+                                else
+                                {
+                                    <img src="https://adjditec.com/web/skin/img/noimage.jpg" class="card-img-top" alt="No image found">
+                                }
                             </td>
                             <td class="d-none d-md-table-cell">
                                 <span>$@detail.Price</span>
@@ -148,7 +155,34 @@
         var response = await Http.PostAsJsonAsync("/api/Dish", dish);
         if (response.StatusCode == System.Net.HttpStatusCode.Created)
         {
-            BodyMessage = "Producto creado";
+            var dishCreated = await response.Content.ReadFromJsonAsync<Dish>();
+            await uploadImage(dishCreated?.id);
+        }
+        else
+        {
+            BodyMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async Task uploadImage(int? dishId)
+    {
+        if (dish is null) return;
+
+        var maxAllowedSize = 1024 * 10000;
+        using var content = new MultipartFormDataContent();
+
+        var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize));
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+
+        content.Add(
+            content: fileContent,
+            name: "\"files\"",
+            fileName: file.Name);
+
+        var response = await Http.PostAsync($"/api/upload/{dishId}", content);
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            BodyMessage = "Imagen subida con exito";
             refModal.Open();
             await FetchProductList();
         }

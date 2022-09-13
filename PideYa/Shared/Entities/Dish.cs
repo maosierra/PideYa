@@ -17,6 +17,7 @@ namespace PideYa.Shared.Entities
         [Range(1, 999999, ErrorMessage = "Seleccione una categoria valida")]
         public int CategoryId { get; set; }
         public DishCategory? Category { get; set; }
+        public List<DishImage>? Image { get; set; }
     }
 }
 

@@ -21,7 +21,14 @@ else
 
             <div class="col">
                 <div class="card">
-                    <img src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" class="card-img-top" alt="...">
+                    @if (dish.Image is not null && dish.Image.Count() > 0)
+                    {
+                        <img src=@($"/{dish.Image.First().url}") class="card-img-top" alt=@(dish.Description??"Dish image")>
+                    }
+                    else
+                    {
+                        <img src="https://adjditec.com/web/skin/img/noimage.jpg" class="card-img-top" alt="No image found">
+                    }
                     <div class="card-body">
                         <h5 class="card-title">@dish.Name</h5>
                         <p class="card-text">@dish.Description</p>

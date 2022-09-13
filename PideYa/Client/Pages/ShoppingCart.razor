@@ -31,8 +31,17 @@
                                 <small>@detail.Dish.Description</small>
                                 <br />
                             </td>
+
+
                             <td class="d-none d-md-table-cell" style="max-width: 100px">
-                                <img class="w-75" src="https://embed.widencdn.net/img/mccormick/v0rvkwdwlk/2000x1125px/sopa_de_pollo.jpg?crop=true&q=80&color=ffffffff&u=qwwekl" alt="Plato" title="plato" />
+                                @if (detail.Dish.Image is not null && detail.Dish.Image.Count() > 0)
+                                {
+                                    <img src=@($"/{detail.Dish.Image.First().url}") class="card-img-top" alt=@(detail.Dish.Description??"Dish image")>
+                                }
+                                else
+                                {
+                                    <img src="https://adjditec.com/web/skin/img/noimage.jpg" class="card-img-top" alt="No image found">
+                                }
                             </td>
                             <td class="d-none d-md-table-cell">
                                 <span>$@detail.Dish.Price</span>
