@@ -1,10 +1,50 @@
 ﻿@page "/"
+@using PideYa.Shared.Entities
+@inject HttpClient Http
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Ordenes</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Mis ultimas ordenes</h1>
 
-Welcome to your new app.
+<table class="table">
+    <thead>
+        <tr>
+            <th>Numero Orden</th>
+            <th class="d-none d-md-table-cell">Fecha</th>
+            <th>Descripcion</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Orders is not null && Orders.Count() > 0)
+        {
+            @foreach (var order in Orders)
+            {
+                <tr>
+                    <td>
+                        @order.Id
+                    </td>
+                    <td>
+                        @order.CreatedAt.ToShortDateString()
+                    </td>
+                    <td>
+                        @if (order.OrderDetails is not null && order.OrderDetails.Count() > 0)
+                        {
+                            @string.Join(", ", order.OrderDetails.Select(d => d.Dish.Name));
+                        }
+                    </td>
+                    <td>
+                        @(order.OrderDetails?.Sum(s => s.Dish.Price) ?? 0)
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    public List<Order>? Orders { get; set; }
+
+    protected override async Task OnInitializedAsync() => Orders = await Http.GetFromJsonAsync<List<Order>>("/api/Order");
+}
 

@@ -138,7 +138,11 @@ namespace PideYa.Server.Controllers
             {
                 return NotFound();
             }
-            return await _context.Orders.ToListAsync();
+            return await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.Dish)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
         }
 
         // GET: api/Order/5
@@ -149,7 +153,7 @@ namespace PideYa.Server.Controllers
             {
                 return NotFound();
             }
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
             {
