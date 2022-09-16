@@ -1,0 +1,125 @@
+﻿@page "/dishcategory"
+@inject IDishCategoryService DishCategoryService
+
+<PageTitle>PideYa - Crea tu categoria aca</PageTitle>
+
+<h1>Creacion de categorias</h1>
+
+<Modal @ref="refModal">
+    <Title>Producto</Title>
+    <Body>
+        <p>
+            @BodyMessage
+        </p>
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => refModal.Close()">Close</button>
+    </Footer>
+</Modal>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <EditForm Model="@dishCategory" OnValidSubmit="@(async ()=> await createCategory())">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Nombre categoria</label>
+                    <input @bind="@dishCategory.Name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Nombre del producto">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Descripcion de la categoria</label>
+                    <textarea @bind="@dishCategory.Description" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <div class="mt-5">
+                    <button type="submit" class="btn btn-primary btn-block">Crear</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+
+    <div class="col-lg-8 mb-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Descripcion</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (dishCategories != null && dishCategories.Count() > 0)
+                {
+                    @foreach (var detail in dishCategories)
+                    {
+                        <tr>
+                            <td>
+                                <h5>@detail.Id</h5>
+                            </td>
+                            <td>
+                                <h5>@detail.Name</h5>
+                            </td>
+                            <td>
+                                <span>@detail.Description</span>
+                            </td>
+                            <td>
+                                <a style="cursor: pointer;"
+                                   @onclick="async () =>await onDeleteDetail(detail.Id)">
+
+                                    <span class="oi oi-trash" aria-hidden="true"></span>
+
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private Modal refModal { get; set; }
+    private string BodyMessage { get; set; }
+    private PideYa.Shared.Entities.DishCategory dishCategory = new();
+    private IEnumerable<PideYa.Shared.Entities.DishCategory> dishCategories { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        dishCategories = await DishCategoryService.GetAll();
+    }
+
+    private async Task createCategory()
+    {
+        try
+        {
+            await DishCategoryService.Create(dishCategory);
+            dishCategories = await DishCategoryService.GetAll();
+            BodyMessage = "Categoria creada";
+            refModal.Open();
+        }
+        catch (Exception ex)
+        {
+            BodyMessage = "Ocurrio un problema al crear la categoria";
+            refModal.Open();
+        }
+    }
+
+    private async Task onDeleteDetail(int id)
+    {
+        try
+        {
+            await DishCategoryService.Delete(id);
+            dishCategories = await DishCategoryService.GetAll();
+        }
+        catch (Exception ex)
+        {
+            BodyMessage = ex.Message;
+            refModal.Open();
+        }
+    }
+
+}
+
