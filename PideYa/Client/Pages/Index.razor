@@ -1,6 +1,6 @@
 ﻿@page "/"
-@using PideYa.Shared.Entities
-@inject HttpClient Http
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IOrderService OrderService
 
 <PageTitle>Ordenes</PageTitle>
 
@@ -43,8 +43,11 @@
 </table>
 
 @code {
-    public List<Order>? Orders { get; set; }
+    public IEnumerable<Order>? Orders { get; set; }
 
-    protected override async Task OnInitializedAsync() => Orders = await Http.GetFromJsonAsync<List<Order>>("/api/Order");
+    protected override async Task OnInitializedAsync()
+    {
+        Orders = await OrderService.GetAll();
+    }
 }
 

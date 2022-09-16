@@ -1,4 +1,5 @@
-﻿@inject PideYa.Client.Services.OrderNotifierService orderNotifier
+﻿@inject OrderNotifierService orderNotifier
+@inject IAuthenticationService AuthenticationService
 @implements IDisposable
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -27,9 +28,19 @@
                 <span class="oi oi-cart" aria-hidden="true"></span> @NumberOfItems
             </NavLink>
         </div>
+        @if (AuthenticationService.User is not null && AuthenticationService.User.Role == Role.RestaurantAdmin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="createproduct">
+                    <span class="oi"><ion-icon name="create"></ion-icon></span> Productos
+                </NavLink>
+            </div>
+
+        }
+
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="createproduct">
-                <span class="oi"><ion-icon name="create"></ion-icon></span> Productos
+            <NavLink class="nav-link" href="logout">
+                <span class="oi"><ion-icon name="log-out"></ion-icon></span> Logout
             </NavLink>
         </div>
     </nav>

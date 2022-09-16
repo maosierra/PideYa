@@ -2,6 +2,8 @@
 @using PideYa.Shared.Entities
 @using PideYa.Client.Shared
 @inject HttpClient Http
+@inject IDishService DishService
+@inject IDishCategoryService DishCategoryService
 
 <PageTitle>PideYa - Crea tu producto aca</PageTitle>
 
@@ -119,8 +121,8 @@
 
 
 @code{
-    private List<Dish>? products { get; set; }
-    private List<DishCategory>? categories { get; set; }
+    private IEnumerable<Dish>? products { get; set; }
+    private IEnumerable<DishCategory>? categories { get; set; }
     private IBrowserFile? file { get; set; }
     private Dish dish = new();
     private Modal refModal { get; set; }
@@ -128,39 +130,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await FetchProductList();
-        await FetchCategories();
-    }
-
-    private async Task FetchCategories()
-    {
-        var response = await Http.GetAsync("/api/DishCategory");
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            categories = await response.Content.ReadFromJsonAsync<List<DishCategory>>();
-        }
-    }
-
-    private async Task FetchProductList()
-    {
-        var response = await Http.GetAsync("/api/Dish");
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            products = await response.Content.ReadFromJsonAsync<List<Dish>>();
-        }
+        products = await DishService.GetAll();
+        categories = await DishCategoryService.GetAll();
     }
 
     private async Task createProduct()
     {
-        var response = await Http.PostAsJsonAsync("/api/Dish", dish);
-        if (response.StatusCode == System.Net.HttpStatusCode.Created)
+        try
         {
-            var dishCreated = await response.Content.ReadFromJsonAsync<Dish>();
+            var dishCreated = await DishService.Create(dish);
             await uploadImage(dishCreated?.id);
         }
-        else
+        catch (Exception)
         {
-            BodyMessage = await response.Content.ReadAsStringAsync();
+            BodyMessage = "No se puedo crear el producto. Intentelo nuevamente";
+            refModal.Open();
         }
     }
 
@@ -184,7 +168,7 @@
         {
             BodyMessage = "Imagen subida con exito";
             refModal.Open();
-            await FetchProductList();
+            products = await DishService.GetAll();
         }
         else
         {
@@ -199,7 +183,7 @@
         {
             BodyMessage = "Producto eliminado";
             refModal.Open();
-            await FetchProductList();
+            products = await DishService.GetAll();
         }
         else
         {

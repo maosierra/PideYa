@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace PideYa.Shared.Entities
@@ -12,6 +13,9 @@ namespace PideYa.Shared.Entities
         public string Email { get; set; }
         public Role Role { get; set; }
         public ICollection<Order> Orders { get; set; }
+
+        [NotMapped]
+        public string Token { get; set; }
 
         [JsonIgnore]
         public string PasswordHash { get; set; }

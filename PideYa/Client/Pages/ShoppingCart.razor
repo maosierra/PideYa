@@ -1,7 +1,7 @@
 ﻿@page "/shoppingcart"
 @inject HttpClient Http
-@inject PideYa.Client.Services.OrderNotifierService orderNotifier
-@using PideYa.Shared.Entities
+@inject OrderNotifierService orderNotifier
+@inject IOrderService OrderService
 
 <PageTitle>PideYa - Apurate...</PageTitle>
 
@@ -100,13 +100,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync("/api/OrderByEmployee/1");
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            order = await response.Content.ReadFromJsonAsync<Order>();
-            SumUpDetails();
-            await orderNotifier.AddOrder(order);
-        }
+        order = await OrderService.GetActive();
+        SumUpDetails();
+        await orderNotifier.AddOrder(order);
     }
 
     private void SumUpDetails()
@@ -122,27 +118,20 @@
     private async Task onDeleteDetail(int detailId)
     {
         var orderId = order?.Id ?? 0;
-        var response = await Http.GetAsync($"/api/OrderDeleteDetail?orderId={orderId}&detailId={detailId}");
-        if (response.IsSuccessStatusCode)
-        {
-            order = await response.Content.ReadFromJsonAsync<Order>();
-            SumUpDetails();
-            await orderNotifier.AddOrder(order);
-            StateHasChanged();
-        }
+        order = await OrderService.RemoveDetail(orderId, detailId);
+        SumUpDetails();
+        await orderNotifier.AddOrder(order);
+        StateHasChanged();
     }
 
     private async Task onBuy(int? orderId)
     {
         if (orderId is not null && order is not null)
         {
-            var response = await Http.GetAsync($"/api/OrderProcesing?orderId={orderId}");
-            if (response.IsSuccessStatusCode)
-            {
-                order = null;
-                await orderNotifier.AddOrder(order);
-                StateHasChanged();
-            }
+            await OrderService.Process(orderId ?? 0);
+            order = null;
+            await orderNotifier.AddOrder(order);
+            StateHasChanged();
         }
 
     }

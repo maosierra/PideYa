@@ -12,6 +12,7 @@ namespace PideYa.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly DataContext _context;
@@ -50,12 +51,13 @@ namespace PideYa.Server.Controllers
             Order? order;
             if (!await _context.Orders.AnyAsync(o => o.Id == orderId && o.Status == OrderStatus.Pending))
             {
+                var idUser = ((User)HttpContext.Items["User"]).Id;
                 order = new Order
                 {
                     CreatedAt = DateTime.Now,
                     Status = OrderStatus.Pending,
                     Total = 0,
-                    UserId = 1,
+                    UserId = idUser,
                     OrderDetails = new List<OrderDetail>
                     {
                         new()
@@ -97,6 +99,7 @@ namespace PideYa.Server.Controllers
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(d => d.Dish)
+                .ThenInclude(i => i.Image)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order is not null && order.OrderDetails.Any(d => d.Id == detailId))

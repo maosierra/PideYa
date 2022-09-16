@@ -23,6 +23,7 @@ namespace PideYa.Server.Controllers
 
         // GET: api/Dish
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Dish>>> GetDishes()
         {
             if (_context.Dishes == null)
@@ -37,6 +38,7 @@ namespace PideYa.Server.Controllers
 
         // GET: api/Dish/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Dish>> GetDish(int id)
         {
             if (_context.Dishes == null)
@@ -58,6 +60,7 @@ namespace PideYa.Server.Controllers
         // PUT: api/Dish/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutDish(int id, Dish dish)
         {
             if (id != dish.id)
@@ -89,6 +92,7 @@ namespace PideYa.Server.Controllers
         // POST: api/Dish
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Dish>> PostDish(Dish dish)
         {
             if (_context.Dishes == null)

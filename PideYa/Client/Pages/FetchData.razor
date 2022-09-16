@@ -1,7 +1,7 @@
 ﻿@page "/fetchdata"
-@using PideYa.Shared.Entities
-@inject HttpClient Http
-@inject PideYa.Client.Services.OrderNotifierService orderNotifier
+@inject OrderNotifierService orderNotifier
+@inject IDishService DishService
+@inject IOrderService OrderService
 
 <PageTitle>PideYa - Pilas que tengo hambre</PageTitle>
 
@@ -42,34 +42,21 @@ else
 }
 
 @code {
-    private List<Dish>? dishes;
+    private IEnumerable<Dish>? dishes;
     private Order? order;
 
     protected override async Task OnInitializedAsync()
     {
-        dishes = await Http.GetFromJsonAsync<List<Dish>>("/api/Dish");
-        await getActiveOrder();
-    }
-
-    private async Task getActiveOrder()
-    {
-        var response = await Http.GetAsync("/api/OrderByEmployee/1");
-        if (response.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            order = await response.Content.ReadFromJsonAsync<Order>();
-            await orderNotifier.AddOrder(order);
-        }
+        dishes = await DishService.GetAll();
+        order = await OrderService.GetActive();
+        await orderNotifier.AddOrder(order);
     }
 
     private async Task AddToCar(int id)
     {
         var orderId = order?.Id ?? 0;
-        var response = await Http.GetAsync($"/api/OrderAddDetail?orderId={orderId}&dishId={id}&quantity=1");
-        if (response.IsSuccessStatusCode)
-        {
-            order = await response.Content.ReadFromJsonAsync<Order>();
-            await orderNotifier.AddOrder(order);
-        }
+        order = await OrderService.AddDetail(orderId, id);
+        await orderNotifier.AddOrder(order);
     }
 }
 

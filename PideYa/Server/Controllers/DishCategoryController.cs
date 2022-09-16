@@ -12,6 +12,7 @@ namespace PideYa.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DishCategoryController : ControllerBase
     {
         private readonly DataContext _context;
@@ -25,10 +26,10 @@ namespace PideYa.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DishCategory>>> GetDishesCategories()
         {
-          if (_context.DishesCategories == null)
-          {
-              return NotFound();
-          }
+            if (_context.DishesCategories == null)
+            {
+                return NotFound();
+            }
             return await _context.DishesCategories.ToListAsync();
         }
 
@@ -36,10 +37,10 @@ namespace PideYa.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DishCategory>> GetDishCategory(int id)
         {
-          if (_context.DishesCategories == null)
-          {
-              return NotFound();
-          }
+            if (_context.DishesCategories == null)
+            {
+                return NotFound();
+            }
             var dishCategory = await _context.DishesCategories.FindAsync(id);
 
             if (dishCategory == null)
@@ -86,10 +87,10 @@ namespace PideYa.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<DishCategory>> PostDishCategory(DishCategory dishCategory)
         {
-          if (_context.DishesCategories == null)
-          {
-              return Problem("Entity set 'DataContext.DishesCategories'  is null.");
-          }
+            if (_context.DishesCategories == null)
+            {
+                return Problem("Entity set 'DataContext.DishesCategories'  is null.");
+            }
             _context.DishesCategories.Add(dishCategory);
             await _context.SaveChangesAsync();
 
